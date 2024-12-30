@@ -1,2 +1,2 @@
 # BatallaNaval
-Juego creado en Java como parte del cursos java básico de HyperSkil.com
+Juego creado en Java como parte del curso java básico realizado en HyperSkil.com

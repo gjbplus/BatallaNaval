@@ -3,7 +3,7 @@
 *.iml
 
 # Archivos de compilación
-/out/
+out/
 
 # Archivos del sistema operativo Windows
 Thumbs.db

@@ -1,16 +1,31 @@
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
-
-### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
-*.iws
+# Archivos y carpetas específicos de IntelliJ
+.idea/
 *.iml
+
+# Archivos de compilación
+/out/
+
+# Archivos del sistema operativo Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Archivos de log
+*.log
+
+# Archivos de configuraciones de usuario de IntelliJ
+*.iws
 *.ipr
+
+# Dependencias y librerías (si usas Maven o Gradle)
+/target/
+/build/
+
+# Otros archivos específicos del entorno
+*.class
+*.exe
+*.dll
+*.pdb
 
 ### VS Code ###
 .vscode/

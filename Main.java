@@ -1,5 +1,4 @@
 import java.util.Scanner;
-import java.util.HashMap;
 import java.util.ArrayList;
 
 public class Main {
@@ -7,6 +6,9 @@ public class Main {
     private static char letraFin = ' ' ;
     private static int posIni = -1;
     private static int posFin = -1;
+
+    private static char letraShotPlayerOne = ' ';
+    private static int numberShotPlayerOne = -1;
 
     public enum RowIndex {
         A(0), B(1), C(2), D(3), E(4), F(5), G(6), H(7), I(8), J(9);
@@ -34,6 +36,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         char[][] tablero = new char[10][10];
+        char[][] tableroFog = new char[10][10];
         char[][] selectedPos = new char[10][10];
 
         String validationResult= "";
@@ -45,7 +48,11 @@ public class Main {
         boolean cruiserOk = false;
         boolean destroyerOk = false;
 
+        boolean shotPlayerOne = false;
+        boolean shotRangeError = false;
+
         iniciarTablero(tablero);
+        iniciarTablero(tableroFog);
         imprimirTablero(tablero);
 
         // Aircraft 5 cells
@@ -56,7 +63,6 @@ public class Main {
             try {
                 String[] airPositions = sc.nextLine().toUpperCase().split(" ");
 
-                aircraftOk = false;
                 extraeLetrasyNumeros(airPositions);
 
                 validationResult = validarRango(posIni, posFin, letraIni, letraFin);
@@ -98,7 +104,6 @@ public class Main {
             try {
                 String[] batPositions = sc.nextLine().toUpperCase().split(" ");
 
-                battleShipOk = false;
                 extraeLetrasyNumeros(batPositions);
                 validationResult = validarRango(posIni, posFin, letraIni, letraFin);
                 countPos = cellsCount(posIni, posFin, letraIni, letraFin);
@@ -138,7 +143,6 @@ public class Main {
             try {
                 String[] subPositions = sc.nextLine().toUpperCase().split(" ");
 
-                submarineOk = false;
                 extraeLetrasyNumeros(subPositions);
 
                 validationResult = validarRango(posIni, posFin, letraIni, letraFin);
@@ -178,7 +182,6 @@ public class Main {
             try {
                 String[] cruPositions = sc.nextLine().toUpperCase().split(" ");
 
-                cruiserOk = false;
                 extraeLetrasyNumeros(cruPositions);
 
                 validationResult = validarRango(posIni, posFin, letraIni, letraFin);
@@ -204,6 +207,8 @@ public class Main {
                     } else {
                         System.out.println("Error! Wrong length of the Cruiser! Try again:");
                     }
+                }else{
+                    System.out.println(validationResult);
                 }
             } catch (Exception e) {
                 System.out.println( e.getMessage());
@@ -217,7 +222,6 @@ public class Main {
             try {
                 String[] desPositions = sc.nextLine().toUpperCase().split(" ");
 
-                destroyerOk = false;
                 extraeLetrasyNumeros(desPositions);
 
                 validationResult = validarRango(posIni, posFin, letraIni, letraFin);
@@ -243,11 +247,54 @@ public class Main {
                     } else {
                         System.out.println("Error! Wrong length of the Destroyer! Try again:");
                     }
+                }else{
+                    System.out.println(validationResult);
                 }
             } catch (Exception e) {
                 System.out.println( e.getMessage());
             }
         }while(!destroyerOk);
+
+        System.out.println("The game starts!\n");
+
+
+        // shot player one
+        do{
+
+            try{
+
+                if(!shotRangeError){
+                    imprimirTablero(tableroFog);
+                    System.out.println();
+                    System.out.println("Take a shot!");
+                }
+                String shotPlayerOnePosition = sc.nextLine().toUpperCase();
+                extraeLetrayNumShotPlayerOne(shotPlayerOnePosition);
+                validationResult = validarRangoShot(letraShotPlayerOne, numberShotPlayerOne);
+
+                if (validationResult.equals("Ok")) {
+
+                    char shotResult = marcarShotPosition(tablero, tableroFog, letraShotPlayerOne, numberShotPlayerOne);
+                    imprimirTableroFog(tableroFog);
+
+                    if(shotResult == 'X'){
+                        System.out.println("You hit a ship!");
+                    }else if(shotResult == 'M' || shotResult == 'R'){
+                        System.out.println("You missed!");
+                    }else if(shotResult == 'E'){
+                        System.out.println("Shot Error...");
+                    }
+
+                    imprimirTablero(tablero);
+                    shotPlayerOne = true;
+                }else if(validationResult.equals("Error")){
+                    System.out.println("Error! You entered the wrong coordinates! Try again:\n");
+                    shotRangeError = true;
+                }
+            }catch(Exception e){
+                System.out.println( e.getMessage());
+            }
+        }while(!shotPlayerOne);
 
     }
 
@@ -261,6 +308,22 @@ public class Main {
 
             for(int j = 0; j < tablero[0].length; j++){
                 System.out.print(" " + tablero[i][j]);
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+
+    public static void imprimirTableroFog(char[][] tableroFog){
+        System.out.println("  1 2 3 4 5 6 7 8 9 10");
+        char letraMay = 'A';
+
+        for(int i = 0; i < tableroFog.length; i++){
+            System.out.print(letraMay);
+            letraMay++;
+
+            for(int j = 0; j < tableroFog[0].length; j++){
+                System.out.print(" " + tableroFog[i][j]);
             }
             System.out.println();
         }
@@ -385,6 +448,27 @@ public class Main {
         }
     }
 
+    public static void extraeLetrayNumShotPlayerOne(String position){
+        letraShotPlayerOne = extraeLetraShotPlayerOne(position,'O');
+        numberShotPlayerOne = extraeNumeroShotPlayerOne(position);
+    }
+
+    public static char extraeLetraShotPlayerOne(String positions, char playerOneOrTwo ){
+        return positions.charAt(0);
+    }
+
+    public static int extraeNumeroShotPlayerOne(String positions){
+        return Integer.parseInt(positions.substring(1));
+    }
+
+    public static String validarRangoShot(char letra, int cellNumber){
+
+        if(cellNumber < 1 || cellNumber > 10  || letra < 'A' || letra > 'J'){
+            return "Error";
+        }
+
+        return "Ok";
+    }
 
     //se recorren las posiciones elegidas
     //se verifica si cumplen con las reglas de posición del juego
@@ -406,109 +490,83 @@ public class Main {
     public static boolean cumpleLasReglasDeAdyacencia(char[][] selectedPos, char[][] tablero){
         ArrayList<String> celdasSelected = new ArrayList<String>();
         ArrayList<String> celdasAdyacentes = new ArrayList<String>();
-        HashMap<Integer, String> celdasSelHash = new HashMap<Integer, String>();
-        String ubicacion = "";
 
-        for(int i = 0; i < selectedPos.length;i++){
-            for(int j = 0; j< selectedPos[0].length; j++){
+        for(int i = 0; i < selectedPos.length; i++){
+            for(int j = 0; j < selectedPos[0].length; j++){
                 if(selectedPos[i][j] == 'O'){
-                    String strI = String.valueOf(i);
-                    String strJ = String.valueOf(j);
-                    String unirNums = strI + strJ;
+                    String unirNums = i + "" + j;
                     celdasSelected.add(unirNums);
                 }
             }
         }
 
-        for(int i = 0; i < celdasSelected.size(); i++){
-            celdasSelHash.put(i,celdasSelected.get(i));
-            // System.out.print( celdasSelected.get(i) + " ");
-        }
-
-        int rowIni = Integer.valueOf(celdasSelHash.get(0).substring(0,1));
-        int colIni = Integer.valueOf(celdasSelHash.get(0).substring(1));
-        int rowFin = Integer.valueOf(celdasSelHash.get(celdasSelHash.size() -1).substring(0,1));
-        int colFin = Integer.valueOf(celdasSelHash.get(celdasSelHash.size() -1).substring(1));
+        int rowIni = Integer.valueOf(celdasSelected.get(0).substring(0, 1));
+        int colIni = Integer.valueOf(celdasSelected.get(0).substring(1));
+        int rowFin = Integer.valueOf(celdasSelected.get(celdasSelected.size() -1).substring(0, 1));
+        int colFin = Integer.valueOf(celdasSelected.get(celdasSelected.size() -1).substring(1));
 
         if(rowIni == rowFin){
-            ubicacion = "Horizontal";
-
-            //compruebo si a la izquierda del primer elemento puedo agregar una celda de adyacencia
+            // nave con ubicación Horizontal
             if(rowIni >= 0 && rowIni <= 9){
                 int colIniAd = colIni - 1;
-                if(colIniAd >= 0 && colIniAd <= 9 ){
-                    celdasAdyacentes.add(String.valueOf(rowIni) + String.valueOf(colIniAd));
+                if(colIniAd >= 0 && colIniAd <= 9){
+                    celdasAdyacentes.add(rowIni + "" + colIniAd);
                 }
             }
 
-            //compruebo si a la derecha del último elemento puedo agregar una celda de adyacencia
             if(rowFin >= 0 && rowFin <= 9){
                 int colFinAd = colFin + 1;
-                if(colFinAd >=0 && colFinAd <= 9){
-                    celdasAdyacentes.add(String.valueOf(rowFin) + String.valueOf(colFinAd));
+                if(colFinAd >= 0 && colFinAd <= 9){
+                    celdasAdyacentes.add(rowFin + "" + colFinAd);
                 }
             }
 
-            for(int i = 0; i < celdasSelHash.size(); i++){
-                int rIni = Integer.valueOf(celdasSelHash.get(i).substring(0,1));
-                int cIni = Integer.valueOf(celdasSelHash.get(i).substring(1));
+            for(int i = 0; i < celdasSelected.size(); i++){
+                int rIni = Integer.valueOf(celdasSelected.get(i).substring(0, 1));
+                int cIni = Integer.valueOf(celdasSelected.get(i).substring(1));
 
                 if(cIni >= 0 && cIni <= 9){
-
-                    // Si la celda superior de cada elemento está en un rago válido
-                    // la agrego a la lista de celdas adyacentes
-                    int rIniSupAd = rIni -1;
+                    int rIniSupAd = rIni - 1;
                     if(rIniSupAd >= 0 && rIniSupAd <= 9){
-                        celdasAdyacentes.add(String.valueOf(rIniSupAd) + String.valueOf(cIni));
+                        celdasAdyacentes.add(rIniSupAd + "" + cIni);
                     }
 
-                    // Si la celda inferior de cada elemento está en un rago válido
-                    // la agrego a la lista de celdas adyacentes
                     int rIniInfAd = rIni + 1;
                     if(rIniInfAd >= 0 && rIniInfAd <= 9){
-                        celdasAdyacentes.add(String.valueOf(rIniInfAd) + String.valueOf(cIni));
+                        celdasAdyacentes.add(rIniInfAd + "" + cIni);
                     }
-
                 }
             }
-        }else{
-            ubicacion = "Vertical";
-
-            //compruebo si arriba del primer elemento puedo agregar una celda de adyacencia
+        } else {
+            // nave con ubicación Vertical
             if(colIni >= 0 && colIni <= 9){
                 int rowIniAd = rowIni - 1;
                 if(rowIniAd >= 0 && rowIniAd <= 9){
-                    celdasAdyacentes.add(String.valueOf(rowIniAd) + String.valueOf(colIni));
+                    celdasAdyacentes.add(rowIniAd + "" + colIni);
                 }
             }
 
-            //compruebo si abajo del ultimo elemento puedo agregar una celda de adyacencia
             if(colIni >= 0 && colIni <= 9){
                 int rowFinAd = rowFin + 1;
                 if(rowFinAd >= 0 && rowFinAd <= 9){
-                    celdasAdyacentes.add(String.valueOf(rowFin + 1) + String.valueOf(colFin));
+                    celdasAdyacentes.add((rowFin + 1) + "" + colFin);
                 }
             }
 
-            for (int i = 0; i < celdasSelHash.size(); i++) {
-                int rIni = Integer.valueOf(celdasSelHash.get(i).substring(0, 1));
-                int cIni = Integer.valueOf(celdasSelHash.get(i).substring(1));
+            for (int i = 0; i < celdasSelected.size(); i++) {
+                int rIni = Integer.valueOf(celdasSelected.get(i).substring(0, 1));
+                int cIni = Integer.valueOf(celdasSelected.get(i).substring(1));
 
-                // compruebo si la celda a la izquierda es una celda válida
-                // si es una celda válida la agrego a la lista de celdas de adyacencia
                 if(rIni >= 0 && rIni <= 9){
-                    int colAdIzq= cIni - 1;
-                    if(colAdIzq >=0 && colAdIzq <= 9){
-                        celdasAdyacentes.add(String.valueOf(rIni) + String.valueOf(colAdIzq));
+                    int colAdIzq = cIni - 1;
+                    if(colAdIzq >= 0 && colAdIzq <= 9){
+                        celdasAdyacentes.add(rIni + "" + colAdIzq);
                     }
 
-                    // compruebo si la celda a la derecha es una celda válida
-                    // si es una celda válida la agrego a la lista de celdas de adyacencia
                     int colAdDer = cIni + 1;
                     if(colAdDer >= 0 && colAdDer <= 9){
-                        celdasAdyacentes.add(String.valueOf(rIni) + String.valueOf(colAdDer));
+                        celdasAdyacentes.add(rIni + "" + colAdDer);
                     }
-
                 }
             }
         }
@@ -516,8 +574,7 @@ public class Main {
         System.out.println(celdasAdyacentes);
 
         for(String cAd: celdasAdyacentes){
-
-            int rIni = Integer.valueOf(cAd.substring(0,1));
+            int rIni = Integer.valueOf(cAd.substring(0, 1));
             int cIni = Integer.valueOf(cAd.substring(1));
 
             if(tablero[rIni][cIni] != '~'){
@@ -537,6 +594,29 @@ public class Main {
                 }
             }
         }
+    }
+
+    //se marca en el tablero del juego la posicion del barco actual
+    public static char marcarShotPosition(char[][] tablero, char[][] tableroFog, char letra, int cellNumber){
+
+        int letraIndex = RowIndex.indexFromChar(letra);
+        int numberIndex = cellNumber -1;
+
+        if(tablero[letraIndex][numberIndex] == 'O'){
+            tablero[letraIndex][numberIndex] = 'X';
+            tableroFog[letraIndex][numberIndex] = 'X';
+            return 'X';
+        }else if(tablero[letraIndex][numberIndex] == '~'){
+            tablero[letraIndex][numberIndex] = 'M';
+            tableroFog[letraIndex][numberIndex] = 'M';
+            return 'M';
+        }
+        else if(tablero[letraIndex][numberIndex] == 'M'){
+            return 'R';
+        }else{
+            return 'E';
+        }
+
     }
 
 }
